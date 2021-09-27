@@ -82,7 +82,7 @@ let members = (callback) => {
         request(cb);
     }
 
-    let members_delete = (cb) => {
+    let members_delete = (cb) => { 
         options.method = "DELETE";
         options.path = "/members?username=test_account";
         request(cb);
