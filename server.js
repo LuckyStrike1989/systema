@@ -7,8 +7,8 @@ class tcpServer {
     constructor(name, port, urls) {
         // 서버 정보
         this.context = {
+            name : name,
             port : port,
-            name : name, 
             urls : urls
         }
 
@@ -68,6 +68,35 @@ class tcpServer {
 
     onClose(socket) {
         console.log("onClose => ", socket.remoteAddress, socket.remotePort);
+    }
+
+    connectToDistributor(host, port, onNoti) {
+        var packet = {                          // 패킷 정의
+            uri : "/distributes",
+            method : "POST",
+            key : 0,
+            params : this.context
+        };
+
+        let isConnectedDistributor = false;     // Distributor 접속 상태
+
+        this.clientDistributor = new tcpClient(
+            host
+            , port
+            , (options) => {                                    // 접속 이벤트
+                isConnectedDistributor = true;
+                this.clientDistributor.write(packet);
+            }
+            , (options, data) => { onNoti(data); }              // 데이터 수신
+            , (options) => { isConnectedDistributor = false }   // 접속 종료
+            , (options) => { isConnectedDistributor = false }   // 에러
+        );
+        
+        setInterval(() => {
+            if( isConnectedDistributor != true ) {
+                this.clientDistributor.connect();
+            }
+        }, 3000);
     }
 }
 
